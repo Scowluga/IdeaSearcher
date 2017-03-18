@@ -10,45 +10,10 @@ Description
 
 function displayBlank() { // no ideas! 
 	$("#topDiv").style="display:none;"; 
-	$("#botDiv").style="display:inline"; 
+	$("#botDiv").style="display:inline;"; 
 }
 
-function searchBtn(id) {
-	chrome.storage.local.set({"current" : id}); 
-	window.location="search/search.html"; 
-}
-
-function editBtn(id) {
-	chrome.storage.local.set({"current" : id}); 
-	window.location="edit/edit.html"; 
-}
-function deleteBtn(id) {
-	// SOMEHOW CONFIRM 
-
-}
-
-function setup3(ideas) { 
-	// Setup List First 
-	for (i = 0; i < ideas.length; i ++) {
-		var idea = ideas[i]; 
-		var info = idea.split(DELIM); 
-		var ul = document.getElementById("ideaList"); 
-		var li = document.createElement("li"); 
-		li.setAttribute("class", "listItem"); 
-		li.innerHTML = `<div class="ideaRow">
-					<p class="itemTitle">` + info[1] + `</p>
-					<div class="ideaImgs">
-						<img class="ideaImg search" src="res/search.png" id="` + info[0] + `"/>
-						<img class="ideaImg edit" src="res/edit.png" id="` + info[0] + `"/>
-						<img class="ideaImg delete" src="res/delete.png" id="` + info[0] + `"/>
-					</div>
-				</div>
-				<p class="itemDescription">` + info[2] + `</p> 
-				<p>` + info[0] + "</p>"; // the id 
-
-		ul.appendChild(li); 
-	}
-
+function setButtonListeners() {
 	$('.search').click(function(){
 		searchBtn(this.id);
 	});
@@ -58,7 +23,57 @@ function setup3(ideas) {
 	$('.delete').click(function(){
 		deleteBtn(this.id);
 	});
+}
 
+function getLi(idea, visible) {
+	var info = idea.split(DELIM); 
+	var li = document.createElement("li"); 
+	li.setAttribute("class", "listItem"); 
+	li.setAttribute("id", info[0] + "list"); 
+	if (!visible) {
+		li.style = "display:none;"; 
+	}
+	li.innerHTML = `<div class="ideaRow">
+				<p class="itemTitle">` + info[1] + `</p>
+				<div class="ideaImgs">
+					<img class="ideaImg search" src="res/search.png" id="` + info[0] + `"/>
+					<img class="ideaImg edit" src="res/edit.png" id="` + info[0] + `"/>
+					<img class="ideaImg delete" src="res/delete.png" id="` + info[0] + `"/>
+				</div>
+			</div>
+			<p class="itemDescription">` + info[2] + `</p> 
+			<p>` + info[0] + "</p>"; // the id 
+	return li; 
+}
+function searchBtn(id) {
+	chrome.storage.local.set({"current" : id}); 
+	window.location="search/search.html"; 
+}
+function editBtn(id) {
+	chrome.storage.local.set({"current" : id}); 
+	window.location="edit/edit.html"; 
+}
+function deleteBtn(id) {
+	// SOMEHOW CONFIRM 
+	$("#" + id + "list").slideUp(); 
+}
+function addIdea(idea) {
+	var ul = document.getElementById("ideaList"); 
+	var li = getLi(idea, false); 
+	ul.insertBefore(li, ul.firstChild);
+	$(li).slideDown();
+	setButtonListeners(); 
+}
+
+function setup3(ideas) { 
+	// Setup List First 
+	for (i = 0; i < ideas.length; i ++) {
+		var idea = ideas[i]; 
+		var ul = document.getElementById("ideaList"); 
+		li = getLi(idea, true); 
+		ul.appendChild(li); 
+	}
+	setButtonListeners(); 
 }
 
 function setup2(ideaList) { // set up the list <ul> on home.html 
@@ -81,7 +96,6 @@ function setup1() {
 		}
 	})
 }
-
 
 function initialize() { // first run 
 	chrome.storage.local.set({"first" : "initialized!"});
@@ -111,31 +125,12 @@ function initialize() { // first run
 	setup1(); 
 }
 
-function addIdea(idea) {
-	var info = idea.split(DELIM); 
-	var ul = document.getElementById("ideaList"); 
-	var li = document.createElement("li"); 
-	li.className = "listItem"; 
-	li.innerHTML = `<div class="ideaRow">
-				<p class="itemTitle">` + info[1] + `</p>
-				<div class="ideaImgs">
-					<img class="ideaImg search" src="res/search.png" id="` + info[0] + `"/>
-					<img class="ideaImg edit" src="res/edit.png" id="` + info[0] + `"/>
-					<img class="ideaImg delete" src="res/delete.png" id="` + info[0] + `"/>
-				</div>
-			</div>
-			<p class="itemDescription">` + info[2] + `</p> 
-			<p>` + info[0] + "</p>"; // the id 
-	ul.insertBefore(li, ul.firstChild);
-}
-
 // RUN CODE 
-
 document.getElementById('headerAdd').onclick = function() {
+	// addIdea("3|||ALAN|||wow so cool"); 
 	chrome.storage.local.set({"current" : "new"}); 
 	window.location.href="edit/edit.html"
 }; 
-
 
 chrome.storage.local.get("state", function(result) {
 	var state = result["state"]; 
