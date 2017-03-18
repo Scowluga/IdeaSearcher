@@ -19,7 +19,8 @@ function searchBtn(id) {
 }
 
 function editBtn(id) {
-	alert(id + " edit"); 	
+	chrome.storage.local.set({"current" : id}); 
+	window.location="edit/edit.html"; 
 }
 function deleteBtn(id) {
 	// SOMEHOW CONFIRM 
