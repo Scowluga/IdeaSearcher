@@ -4,7 +4,10 @@
 var titleInput = $("#titleInput"); 
 var descriptionInput = $("#descriptionInput"); 
 
-$("#submitForm").onsubmit = function() {
-	var title = titleInput.value(); 
-	titleInput.innerHTML = "Please Enter Title"; 
-}
+
+$('#submitForm').submit(function() {
+    var title = titleInput.value(); 
+	var desc = descriptionInput.value(); 
+
+	alert("HI"); 
+});
