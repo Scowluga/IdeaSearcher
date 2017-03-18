@@ -1,0 +1,27 @@
+
+
+.listItem {
+	display: flex; 
+	flex-direction: column; 
+	background-color: green;
+}
+
+.ideaImg {
+
+}
+
+.ideaRow {
+	display: flex;
+}
+
+.ideaImgs {
+	display: flex; 
+	justify-content: flex-end;
+}
+
+.itemTitle {
+	display: flex; 
+	flex-grow: 3; 
+}
+
+

@@ -1,0 +1,24 @@
+{ 
+	"manifest_version": 2, 
+	"name": "Idea Searcher", 
+	"description": "Help expand upon and search an idea on multiple sites at once.", 
+	"version": "1.0", 
+
+	"browser_action": {
+		"default_icon": "res/icon.png", 
+		"default_popup": "home.html"
+	}, 
+
+	"content_scripts": [
+		{ 
+			"matches": ["<all_urls>"],
+			"js": ["jquery-3.2.0.min.js"]
+
+
+		}
+	], 
+
+	"permissions": [
+		"storage" 
+	]
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Title?</title>
+</head>
+<body>
+
+<div class="allDiv" id="topDiv">
+
+	<div id="header">
+		<div id="header1">
+			<img  id="headerIcon" src="res/icon.png" />
+			<h3 id="headerTitle" >Idea Searcher</h3>
+		</div>
+
+		<div id="header2">
+			<button id="headerAdd">+ Add Idea</button>
+			<div id="headerSettings">
+				<a href="settings/settings.html">
+					<img class="headerImg" src="res/settings.png"/>
+				</a>
+			</div>
+			<div id="headerGithub">
+				<a href="https://github.com/Scowluga/IdeaSearcher" target="_blank">
+					<img class="headerImg" src="res/github.png"/>
+				</a>
+			</div>
+		</div>		
+	</div>
+
+	<div id="bottom" style="overflow: auto;">
+		<ul id="ideaList" style="padding: 0; list-style-type: none;">
+<!-- 			<li class="listItem">
+				<div class="ideaRow">
+					<p class="itemTitle">IDEA TITLE</p>
+					<div class="ideaImgs">
+						<img class="ideaImg" src="res/search.png"/>
+						<img class="ideaImg" src="res/edit.png"/>
+						<img class="ideaImg" src="res/delete.png"/>
+					</div>
+				</div>
+				<p class="itemDescription">IDEA DESCRIPTION</p>
+			</li> -->
+
+
+		</ul>
+	</div>
+
+</div>
+
+<div class="allDiv" id="botDiv" style="display:none;">
+	<p>Stumped on ideas? Search for new ones and then add!</p>
+</div>
+
+</body>
+	<script src="jquery-3.2.0.min.js"></script>
+	<script src="home.js"></script>
+	<link rel="stylesheet" type="text/css" href="header.css">
+	<link rel="stylesheet" type="text/css" href="home.css">
+</html>

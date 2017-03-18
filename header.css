@@ -1,0 +1,49 @@
+
+
+.allDiv {
+	width: 500px; 
+	height: 400px; 
+	background-color: blue;
+}
+
+#header {
+	width: 500px; 
+	height: 50px; 
+	display: flex; 
+	flex-direction: row; 
+	background-color: red;
+	border-bottom: solid medium grey; 
+}
+
+#header1 {
+	display: flex; 
+	flex: 1; 
+}
+
+#header2 {
+	display: flex; 
+	justify-content: 
+	flex-end; 
+	flex: 1; 
+}
+
+#headerIcon {
+	width: 30px; 
+	height: 30px; 
+	padding: 10px;
+}
+
+#headerTitle {
+	height: 50px; 
+}
+
+#headerAdd {
+	height: 30px; 
+	margin: 10px; 
+}
+
+.headerImg {
+	width: 30px; 
+	height: 30px; 
+	padding: 10px
+}
