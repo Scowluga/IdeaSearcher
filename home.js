@@ -29,11 +29,13 @@ function getLi(idea, visible) {
 			<p>` + info[0] + "</p>"; // the id 
 	return li; 
 }
+
 function searchBtn(id) {
 	chrome.storage.sync.set({"current" : id}, function() {
 		document.location.href="search/search.html"; 
 	}); 
 }
+
 function editBtn(id) {
 	changeDiv("topDiv", "editDiv"); 
 	openEdit(false, id); // not new 
@@ -86,7 +88,6 @@ function setup () { // gets ideaList from storage, displays
 
 // ----------------- EDIT -----------------
 
-
 var isNew = false; 
 var editId = 0; 
 
@@ -138,9 +139,11 @@ function submit(title, desc) {
 				console.log("Idea added to storage, and to ideaList"); 
 				console.log(newIdea); 
 				changeDiv("editDiv", "topDiv"); 
-				addIdea(newIdea); 
+				addIdea(newIdea);
+				console.log('idea added'); 
 			});
 		}); 
+		console.log('it worked');
 	} else { // EDIT 
 		chrome.storage.sync.set({ // input the new data into the storage id 
 			editId : editId + DELIM + title + DELIM + desc 
@@ -148,17 +151,18 @@ function submit(title, desc) {
 			changeDiv("editDiv", "topDiv"); 
 			setup(); // re-setup with edited idea 
 		}); 
-	}; 
+	};
 }; 
 
 $('#submit').click(function() {
     var title = $("#titleInput").val();  
-	var desc = $("#descriptionInput").val(); 
-	submit(title, desc); 
+	var desc = $("#descriptionInput").val();
+	submit(title, desc);
+	return false;
 });
 
 $("#cancel").click(function() { // change back to home 
-	changeDiv("editDiv", "topDiv"); 
+	changeDiv("editDiv", "topDiv");
 }); 
 
 function openEdit(isadd, id) {
@@ -177,7 +181,6 @@ function openEdit(isadd, id) {
 }; 
 
 // -------------------- INIALIZE ------------------------
-
 
 function initialize() { // setup init
 	chrome.storage.sync.set({
@@ -212,24 +215,24 @@ document.getElementById('headerAdd').onclick = function() {
 
 $(document).ready(function() {
     chrome.storage.sync.get("state", function(result) {
-	var state = result["state"]; 
-	switch(state) {
-		case undefined: 
-			initialize(); 
-			break; 
-		case "initialized!":
-			chrome.storage.sync.get(["3", "4", "ideaList"], function(result) {
-				console.log("initialized!"); 
-				console.log("ideaList: " + result["ideaList"]); 
-				console.log("3: " + result["3"] ); 
-				console.log("4: " + result["4"]);
-			}); 
-			chrome.storage.sync.clear(); 
-			initialize(); 
-			// setup(); 
-			break; 
-	}
-}); 
+		var state = result["state"]; 
+		switch(state) {
+			case undefined: 
+				initialize(); 
+				break; 
+			case "initialized!":
+				chrome.storage.sync.get(["3", "4", "ideaList"], function(result) {
+					console.log("initialized!"); 
+					console.log("ideaList: " + result["ideaList"]); 
+					console.log("3: " + result["3"] ); 
+					console.log("4: " + result["4"]);
+				}); 
+				chrome.storage.sync.clear(); 
+				initialize(); 
+				// setup(); 
+				break; 
+		}
+	}); 
 });
 
 
