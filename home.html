@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Title?</title>
+	<title>Idea Searcher</title>
+	<link rel="stylesheet" type="text/css" href="header.css">
+	<link rel="stylesheet" type="text/css" href="home.css">
 </head>
 <body>
 
 <div class="allDiv" id="topDiv">
-
 	<div id="header">
 		<div id="header1">
 			<img  id="headerIcon" src="res/icon.png" />
@@ -35,6 +36,17 @@
 
 </div>
 
+<div class="allDiv" id="editDiv" style="display:none;">
+	<form id="submitForm">
+		<input type="text" id="titleInput" placeholder="Title" required="true">
+		<br>
+		<input type="text" id="descriptionInput" placeholder="Description">
+		<br><br>
+		<button id="submit">Submit</button>
+		<button id="cancel">Cancel</button>
+	</form>
+</div>
+
 <div class="allDiv" id="botDiv" style="display:none;">
 	<p>Stumped on ideas? Search for new ones and then add!</p>
 </div>
@@ -42,6 +54,4 @@
 </body>
 	<script src="jquery-3.2.0.min.js"></script>
 	<script src="home.js"></script>
-	<link rel="stylesheet" type="text/css" href="header.css">
-	<link rel="stylesheet" type="text/css" href="home.css">
 </html>

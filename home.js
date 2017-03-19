@@ -1,29 +1,13 @@
 
+// ---------------- GENERAL TOOLS ------------
 var DELIM = "|||"; 
 
-/* Idea String Format 
-ID 
-Title
-Description
-
-*/
-
-function displayBlank() { // no ideas! 
-	$("#topDiv").style="display:none;"; 
-	$("#botDiv").style="display:inline;"; 
+function changeDiv(close, open) { // no ideas 
+	document.getElementById(close).style="display:none;"; 
+	document.getElementById(open).style="display:inline;";
 }
 
-function setButtonListeners() {
-	$('.search').click(function(){
-		searchBtn(this.id);
-	});
-	$('.edit').click(function(){
-		editBtn(this.id);
-	});
-	$('.delete').click(function(){
-		deleteBtn(this.id);
-	});
-}
+// ----------------- HOME ---------------
 
 function getLi(idea, visible) {
 	var info = idea.split(DELIM); 
@@ -46,26 +30,33 @@ function getLi(idea, visible) {
 	return li; 
 }
 function searchBtn(id) {
-	chrome.storage.local.set({"current" : id}); 
-	window.location="search/search.html"; 
+	chrome.storage.sync.set({"current" : id}, function() {
+		document.location.href="search/search.html"; 
+	}); 
 }
 function editBtn(id) {
-	chrome.storage.local.set({"current" : id}); 
-	window.location="edit/edit.html"; 
+	changeDiv("topDiv", "editDiv"); 
+	openEdit(false, id); // not new 
 }
+
 function deleteBtn(id) {
 	// SOMEHOW CONFIRM 
 	$("#" + id + "list").slideUp(); 
 }
-function addIdea(idea) {
-	var ul = document.getElementById("ideaList"); 
-	var li = getLi(idea, false); 
-	ul.insertBefore(li, ul.firstChild);
-	$(li).slideDown();
-	setButtonListeners(); 
+
+function setButtonListeners() {
+	$('.search').click(function(){
+		searchBtn(this.id);
+	});
+	$('.edit').click(function(){
+		editBtn(this.id);
+	});
+	$('.delete').click(function(){
+		deleteBtn(this.id);
+	});
 }
 
-function setup3(ideas) { 
+function display(ideas) { 
 	// Setup List First 
 	for (i = 0; i < ideas.length; i ++) {
 		var idea = ideas[i]; 
@@ -76,79 +67,171 @@ function setup3(ideas) {
 	setButtonListeners(); 
 }
 
-function setup2(ideaList) { // set up the list <ul> on home.html 
-	var ideas = []; 
-	chrome.storage.local.get(ideaList, function(result) {
-		for (i = 0; i < ideaList.length; i ++) {
-			ideas.push(result[ideaList[i]])
-		}
-		setup3(ideas); 
-	})
-}
-
-function setup1() {
-	chrome.storage.local.get("ideaList", function(result) {
-		var ideaList = result["ideaList"].split(", "); 
+function setup () { // gets ideaList from storage, displays 
+	chrome.storage.sync.get("ideaList", function(result) {
+		var ideaList = result["ideaList"].split(", "); // [1, 2, 3, 4]
 		if (ideaList.length == 0) {
-			displayBlank(); 
-		} else {
-			setup2(ideaList); 
+			changeDiv("topDiv", "botDiv"); 
+		} else { // you have [1, 2, 3, 4], now get list of their respective strings
+			var ideas = []; // ["1|||title|||desc", "2||||wasdf|||awef"..,]
+			chrome.storage.sync.get(ideaList, function(result) {
+				for (i = 0; i < ideaList.length; i ++) {
+					ideas.push(result[ideaList[i]]); 
+				}
+				display(ideas); // display the list of strings 
+			}); 
 		}
 	})
 }
 
-function initialize() { // first run 
-	chrome.storage.local.set({"first" : "initialized!"});
-	chrome.storage.local.set({"current" : "0"}); 
+// ----------------- EDIT -----------------
 
-	chrome.storage.local.set({ // Ideas 
+
+var isNew = false; 
+var editId = 0; 
+
+function contains(ideas, index) {
+	// check if list ideas contains index 
+	var result = $.inArray(index, ideas); 
+	if (result == -1) {
+		return false; 
+	} else {
+		return true; 
+	}
+}
+
+function addIdea(idea) { // adds an idea 
+	var ul = document.getElementById("ideaList"); 
+	var li = getLi(idea, false); 
+	ul.insertBefore(li, ul.firstChild);
+	$(li).slideDown();
+	setup(); 
+}
+
+function submit(title, desc) {
+	if (isNew) { // add it 
+		chrome.storage.sync.get("ideaList", function(result) {
+			var ideas = []
+			var ideasStringLst = result["ideaList"]; 
+			var ideasList = ideasStringLst.split(", ");
+			$.each(ideasList, function(key, value) {
+				ideas.push(parseInt(value)); 
+			});
+
+			var index = 1; 
+			while (true) {
+				if (!contains(ideas, index)) {
+					break; 
+				} else {
+					index ++; 
+				}; 
+			}; 
+			var id = index.toString(); 
+			var newIdea = id + DELIM + title + DELIM + desc; 
+			var key = "ideaList"; 
+			var value = ideasStringLst + ", " + id; 
+
+			chrome.storage.sync.set({ 
+				id : newIdea, 
+				key : value
+			}, function() { 
+				console.log("Idea added to storage, and to ideaList"); 
+				console.log(newIdea); 
+				changeDiv("editDiv", "topDiv"); 
+				addIdea(newIdea); 
+			});
+		}); 
+	} else { // EDIT 
+		chrome.storage.sync.set({ // input the new data into the storage id 
+			editId : editId + DELIM + title + DELIM + desc 
+		}, function() { 
+			changeDiv("editDiv", "topDiv"); 
+			setup(); // re-setup with edited idea 
+		}); 
+	}; 
+}; 
+
+$('#submit').click(function() {
+    var title = $("#titleInput").val();  
+	var desc = $("#descriptionInput").val(); 
+	submit(title, desc); 
+});
+
+$("#cancel").click(function() { // change back to home 
+	changeDiv("editDiv", "topDiv"); 
+}); 
+
+function openEdit(isadd, id) {
+	isNew = isadd; 
+	editId = id; 
+	if (isadd) {
+		$("#titleInput").val("Default title"); 
+		$("#descriptionInput").val("Default description");  
+	} else { // is Edit
+		chrome.storage.sync.get(editId, function(result) {
+			var info = result[editId].split(DELIM); 
+			$("#titleInput").val(info[1]); 
+			$("#descriptionInput").val(info[2]);  
+		});
+	}
+}; 
+
+// -------------------- INIALIZE ------------------------
+
+
+function initialize() { // setup init
+	chrome.storage.sync.set({
+		"state" : "initialized!", // it won't happen again 
+		"current" : "0", // initialize current
+		// IDEAS
 		"ideaList" : "1, 2", 
 		"1" : "1" + DELIM + "Transit Alarm" + DELIM + "A simple Android application that gives you customizable alarms before your stop (found be geofence).", 
-		"2" : "2" + DELIM + "Virtual Shopper" + DELIM + "Ever wanted to try on the clothes you were going to buy? Do it easily with 3D modelling, and basic inputs that create a 3D avatar for your person."
-	}); 
-
-	chrome.storage.local.set({ // Pages
+		"2" : "2" + DELIM + "Virtual Shopper" + DELIM + "Ever wanted to try on the clothes you were going to buy? Do it easily with 3D modelling, and basic inputs that create a 3D avatar for your person.",
+		// PAGES 
 		"pageList" : "-1, -2, -3, -4, -5", 
 		"-1" : "-1" + DELIM + "Google Search" + DELIM + "https://www.google.ca/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=ideasearcher&*", 
 		"-2" : "-2" + DELIM + "Google Play Store" + DELIM + "https://play.google.com/store/search?q=ideasearcher&c=apps&hl=en", 
 		"-3" : "-3" + DELIM + "Github" + DELIM + "https://github.com/search?utf8=%E2%9C%93&q=ideasearcher", 
 		"-4" : "-4" + DELIM + "Reddit/sideproject" + DELIM + "https://www.reddit.com/r/SideProject/search?q=ideasearcher&restrict_sr=on&sort=relevance&t=all", 
-		"-5" : "-5" + DELIM + "Wikipedia" + DELIM + "https://en.wikipedia.org/w/index.php?search=ideasearcher&title=Special:Search&profile=default&fulltext=1&searchToken=cme8739o4gak9ey4e48urylzr"
-	}); 
- 
-	chrome.storage.local.set({ // settings. Default pages selected, open new tab
-		// first integer is boolean (1/0) of whether the pages are opened in new tab
-		// then list of pre-checked pages
+		"-5" : "-5" + DELIM + "Wikipedia" + DELIM + "https://en.wikipedia.org/w/index.php?search=ideasearcher&title=Special:Search&profile=default&fulltext=1&searchToken=cme8739o4gak9ey4e48urylzr",
+		// SETTINGS
 		"settingList" : "1, -1, -2, -3" 
+	
+	}, function() {
+		setup(); 
 	}); 
-
-	setup1(); 
 }
 
-// RUN CODE 
+// ------------------- RUN CODE --------------------------
+
 document.getElementById('headerAdd').onclick = function() {
 	// addIdea("3|||ALAN|||wow so cool"); 
-	chrome.storage.local.set({"current" : "new"}); 
-	window.location.href="edit/edit.html"
+	changeDiv("topDiv", "editDiv"); 
+	openEdit(true, "0"); // not new 
 }; 
 
-chrome.storage.local.get("state", function(result) {
+$(document).ready(function() {
+    chrome.storage.sync.get("state", function(result) {
 	var state = result["state"]; 
 	switch(state) {
 		case undefined: 
 			initialize(); 
 			break; 
-		case "addNew": // animate the addition 
-			chrome.storage.local.get("current", function(result) {
-				var idea = result["current"];  
-				addIdea(idea); 
-			})
-			break;
 		case "initialized!":
-			setup1(); 
+			chrome.storage.sync.get(["3", "4", "ideaList"], function(result) {
+				console.log("initialized!"); 
+				console.log("ideaList: " + result["ideaList"]); 
+				console.log("3: " + result["3"] ); 
+				console.log("4: " + result["4"]);
+			}); 
+			chrome.storage.sync.clear(); 
+			initialize(); 
+			// setup(); 
 			break; 
 	}
 }); 
+});
+
 
 
 
