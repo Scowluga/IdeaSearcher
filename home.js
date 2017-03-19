@@ -1,6 +1,7 @@
 
 // ---------------- GENERAL TOOLS ------------
 var DELIM = "|||"; 
+var list_ideas = null; 
 
 function changeDiv(close, open) { // no ideas 
 	document.getElementById(close).style="display:none;"; 
@@ -44,6 +45,27 @@ function editBtn(id) {
 function deleteBtn(id) {
 	// SOMEHOW CONFIRM 
 	$("#" + id + "list").slideUp(); 
+
+	var ideas = list_ideas.split(", "); 
+	var retString = ""; 
+	for (i = 0; i < ideas.length; i ++) {
+		var idea = ideas[i]; 
+		if (idea == id) {
+			continue; 
+		} else {
+			retString += ", " + idea; 
+		}
+	}
+	if (retString.length > 2) {
+		retString = retString.substring(2); 
+	}
+	var toBeRet = {}; 
+	toBeRet["ideaList"] = retString.toString(); 
+	chrome.storage.sync.set(toBeRet, function() {
+		console.log("old list: " + list_ideas); 
+		console.log("new list: " + retString.toString()); 
+		console.log("String with id: " + id + " deleted!"); 
+	})
 }
 
 function setButtonListeners() {
@@ -60,11 +82,12 @@ function setButtonListeners() {
 
 function display(ideas) { 
 	// Setup List First 
+	var ul = document.getElementById("ideaList"); 
+	ul.innerHTML = ""; 
 	for (i = 0; i < ideas.length; i ++) {
 		var idea = ideas[i]; 
-		var ul = document.getElementById("ideaList"); 
 		li = getLi(idea, true); 
-		ul.appendChild(li); 
+		ul.insertBefore(li, ul.firstChild); 
 	}
 	setButtonListeners(); 
 }
@@ -106,7 +129,7 @@ function addIdea(idea) { // adds an idea
 	var li = getLi(idea, false); 
 	ul.insertBefore(li, ul.firstChild);
 	$(li).slideDown();
-	setup(); 
+	// setup(); 
 }
 
 function submit(title, desc) {
@@ -132,18 +155,17 @@ function submit(title, desc) {
 			var key = "ideaList"; 
 			var value = ideasStringLst + ", " + id; 
 
-			chrome.storage.sync.set({ 
-				id : newIdea, 
-				key : value
-			}, function() { 
-				console.log("Idea added to storage, and to ideaList"); 
-				console.log(newIdea); 
+			var toBeRet = {}; 
+			toBeRet[id.toString()] = newIdea; 
+			toBeRet['ideaList'] = value; 
+
+			chrome.storage.sync.set(toBeRet, function() {
+				console.log("toBeRet saved!"); 
+				console.log("display add..."); 
 				changeDiv("editDiv", "topDiv"); 
 				addIdea(newIdea);
-				console.log('idea added'); 
-			});
+			})
 		}); 
-		console.log('it worked');
 	} else { // EDIT 
 		chrome.storage.sync.set({ // input the new data into the storage id 
 			editId : editId + DELIM + title + DELIM + desc 
@@ -226,10 +248,11 @@ $(document).ready(function() {
 					console.log("ideaList: " + result["ideaList"]); 
 					console.log("3: " + result["3"] ); 
 					console.log("4: " + result["4"]);
+					list_ideas = result["ideaList"]; 
 				}); 
-				chrome.storage.sync.clear(); 
-				initialize(); 
-				// setup(); 
+				// chrome.storage.sync.clear(); 
+				// initialize(); 
+				setup(); 
 				break; 
 		}
 	}); 
