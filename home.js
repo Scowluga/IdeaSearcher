@@ -1,7 +1,6 @@
 
 // ---------------- GENERAL TOOLS ------------
 var DELIM = "|||"; 
-var list_ideas = null; 
 
 function changeDiv(close, open) { // no ideas 
 	document.getElementById(close).style="display:none;"; 
@@ -31,6 +30,14 @@ function getLi(idea, visible) {
 	return li; 
 }
 
+function setUpBlank() {
+	var ul = document.getElementById("ideaList"); 
+	var li = document.createElement("li"); 
+	li.setAttribute("id", "noIdea")
+	li.innerHTML = "<p>Search for more ideas!</p>"; 
+	ul.appendChild(li); 
+}
+
 function searchBtn(id) {
 	chrome.storage.sync.set({"current" : id}, function() {
 		document.location.href="search/search.html"; 
@@ -43,29 +50,35 @@ function editBtn(id) {
 }
 
 function deleteBtn(id) {
-	// SOMEHOW CONFIRM 
-	$("#" + id + "list").slideUp(); 
-
-	var ideas = list_ideas.split(", "); 
-	var retString = ""; 
-	for (i = 0; i < ideas.length; i ++) {
-		var idea = ideas[i]; 
-		if (idea == id) {
-			continue; 
-		} else {
-			retString += ", " + idea; 
+	chrome.storage.sync.get("ideaList", function(result) {
+		var list_ideas = result["ideaList"]; 
+		var ideas = list_ideas.split(", "); 
+		var retString = ""; 
+		for (i = 0; i < ideas.length; i ++) {
+			var idea = ideas[i]; 
+			if (idea == id) {
+				continue; 
+			} else {
+				retString += ", " + idea; 
+			}
 		}
-	}
-	if (retString.length > 2) {
-		retString = retString.substring(2); 
-	}
-	var toBeRet = {}; 
-	toBeRet["ideaList"] = retString.toString(); 
-	chrome.storage.sync.set(toBeRet, function() {
-		console.log("old list: " + list_ideas); 
-		console.log("new list: " + retString.toString()); 
-		console.log("String with id: " + id + " deleted!"); 
-	})
+		if (retString.length > 2) {
+			retString = retString.substring(2); 
+		}
+		if (retString.length < 1) {
+			setUpBlank(); 
+		}
+		var toBeRet = {}; 
+		toBeRet["ideaList"] = retString.toString(); 
+		chrome.storage.sync.set(toBeRet, function() {
+			console.log("old list: " + list_ideas); 
+			console.log("new list: " + retString.toString()); 
+			console.log("String with id: " + id + " deleted!"); 
+			console.log("re-setting up page..."); 
+			// SOMEHOW CONFIRM 
+			$("#" + id + "list").slideUp(); 
+		});
+	});
 }
 
 function setButtonListeners() {
@@ -94,9 +107,20 @@ function display(ideas) {
 
 function setup () { // gets ideaList from storage, displays 
 	chrome.storage.sync.get("ideaList", function(result) {
-		var ideaList = result["ideaList"].split(", "); // [1, 2, 3, 4]
+		var entire = result["ideaList"]; 
+		if (entire == "" || entire == "," || entire == ", ") {
+			console.log("uh oh the list is: " + entire); 
+		}
+		var ideaList = entire.split(", "); // [1, 2, 3, 4]
+		for (i = 0; i < ideaList.length; i ++) {
+			var item = ideaList[i]; 
+			if (item == "" || item == undefined || item == ",") {
+				console.log("uh oh item : " + item); 
+				ideaList.splice(i, 1); 
+			}
+		}
 		if (ideaList.length == 0) {
-			changeDiv("topDiv", "botDiv"); 
+			setUpBlank(); 
 		} else { // you have [1, 2, 3, 4], now get list of their respective strings
 			var ideas = []; // ["1|||title|||desc", "2||||wasdf|||awef"..,]
 			chrome.storage.sync.get(ideaList, function(result) {
@@ -129,7 +153,7 @@ function addIdea(idea) { // adds an idea
 	var li = getLi(idea, false); 
 	ul.insertBefore(li, ul.firstChild);
 	$(li).slideDown();
-	// setup(); 
+	setup(); 
 }
 
 function submit(title, desc) {
@@ -167,9 +191,10 @@ function submit(title, desc) {
 			})
 		}); 
 	} else { // EDIT 
-		chrome.storage.sync.set({ // input the new data into the storage id 
-			editId : editId + DELIM + title + DELIM + desc 
-		}, function() { 
+		var toBeRet = {}; 
+		toBeRet[editId.toString()] = editId + DELIM + title + DELIM + desc; 
+		chrome.storage.sync.set(toBeRet, function() { 
+			console.log("updated id: " + editId); 
 			changeDiv("editDiv", "topDiv"); 
 			setup(); // re-setup with edited idea 
 		}); 
@@ -248,11 +273,12 @@ $(document).ready(function() {
 					console.log("ideaList: " + result["ideaList"]); 
 					console.log("3: " + result["3"] ); 
 					console.log("4: " + result["4"]);
-					list_ideas = result["ideaList"]; 
+
+					// Actually Run 
+					// chrome.storage.sync.clear(); 
+					// initialize(); 
+					setup(); 
 				}); 
-				// chrome.storage.sync.clear(); 
-				// initialize(); 
-				setup(); 
 				break; 
 		}
 	}); 
