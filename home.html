@@ -17,9 +17,7 @@
 		<div id="header2">
 			<button id="headerAdd">+ Add Idea</button>
 			<div id="headerSettings">
-				<a href="settings/settings.html">
-					<img class="headerImg" src="res/settings.png"/>
-				</a>
+				<img class="headerImg" src="res/settings.png"/>
 			</div>
 			<div id="headerGithub">
 				<a href="https://github.com/Scowluga/IdeaSearcher" target="_blank">
@@ -29,26 +27,48 @@
 		</div>		
 	</div>
 
-	<div id="bottom" style="overflow: auto;">
-		<ul id="ideaList" style="padding: 0; list-style-type: none;">
+	<div id="listDiv" style="overflow: auto;">
+		<ul id="ideaList" class="defaultList">
 		</ul>
 	</div>
 
-	<div id="noIdea" style="display:none;">
-		<p>Stumped on ideas? Search for new ones and then add!</p>
+	<div id="editDiv" style="display:none;">
+		<form id="submitForm">
+			<input type="text" id="titleInput" placeholder="Title" required="true">
+			<br>
+			<input type="text" id="descriptionInput" placeholder="Description">
+			<br><br>
+			<button id="submit">Add</button>
+			<button id="cancel">Cancel</button>
+		</form>	
 	</div>
 
-</div>
+	<div id="searchDiv" style="display:none;">
+		<h3 style="display:inline-block;">Seach Query: </h3>
+		<input id="query" type="text" value="" style="display:inline-block;">
+		<ul id="pages" class="defaultList">
 
-<div class="allDiv" id="editDiv" style="display:none;">
-	<form id="submitForm">
-		<input type="text" id="titleInput" placeholder="Title" required="true">
+		</ul>
+		<button id="searchGo">Open</button>
+		<button id="searchCancel">Cancel</button>
+	</div>
+
+	<div id="settingDiv" style="display:none;">
+		<p>Customize the list of pages that show up when you go to search your idea. To have a page be pre-selected, simply leave it selected here. </p>
+		<p>Name: <input id="pageName" type="text"></p>
+		<p>Search URL: <input id="pageURL" type="text"></p>
+		<a href="https://docs.google.com/document/d/1XL23BSjiGPfKr6HDOvdrtrFqwOpN0NND1Uao9sD3ot8/edit?usp=sharing" target="_blank">Learn how to find a search URL for your site. </a>
 		<br>
-		<input type="text" id="descriptionInput" placeholder="Description">
-		<br><br>
-		<button id="submit">Submit</button>
-		<button id="cancel">Cancel</button>
-	</form>
+		<button id="addPage">Add Page</button>
+		<br>
+
+		<ul id="settingList">
+
+		</ul>
+		<button id="saveSettings">Update Settings</button>
+		<button id="settingCancel">Back</button>
+	</div>
+
 </div>
 
 </body>
